@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.7: http://docutils.sourceforge.net/" />
+<title>XML To DDL</title>
+<meta content="XML, DDL, databases, generation" name="keywords" />
+<meta content="Creating DDL statements from XML" lang="en" name="description" />
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="xml-to-ddl">
+<h1 class="title">XML To DDL</h1>
+<p>''Bringing some sanity to database schemas.''</p>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title first"><a name="table-of-contents">Table of Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#introduction" id="id1" name="id1">Introduction</a></li>
+<li><a class="reference" href="#links" id="id2" name="id2">Links</a></li>
+<li><a class="reference" href="#installing" id="id3" name="id3">Installing</a></li>
+<li><a class="reference" href="#simple-example" id="id4" name="id4">Simple Example</a></li>
+<li><a class="reference" href="#differencing-example" id="id5" name="id5">Differencing Example</a></li>
+<li><a class="reference" href="#using-a-dictionary" id="id6" name="id6">Using a dictionary</a></li>
+<li><a class="reference" href="#downloading-the-xml" id="id7" name="id7">Downloading the XML</a></li>
+<li><a class="reference" href="#outputting-html-documentation" id="id8" name="id8">Outputting HTML Documentation</a></li>
+<li><a class="reference" href="#annotated-xml" id="id9" name="id9">Annotated XML</a></li>
+<li><a class="reference" href="#advantages" id="id10" name="id10">Advantages</a></li>
+<li><a class="reference" href="#to-do" id="id11" name="id11">To do</a></li>
+<li><a class="reference" href="#similar-work" id="id12" name="id12">Similar Work</a></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#id1" name="introduction">Introduction</a></h1>
+<p><tt class="docutils literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> is a set of python programs to convert an XML representation of a schema into a
+database and vice versa. 
+It can also examine the differences between two databases and emit the ALTER DDL statements required to bring the database up-to-date.
+This makes it ideal for storing the database schema into a version control system.</p>
+<p>With <tt class="docutils literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> you can download and create the databases for <a class="reference" href="http://www.postgresql.com/">PostgreSQL</a>, <a class="reference" href="http://www.mysql.com/">MySQL</a>, <a class="reference" href="http://www.oracle.com">Oracle</a>, and <a class="reference" href="http://firebird.sourceforge.net/">Firebird</a>.
+<tt class="docutils literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> strives to be database independant so that the same XML can be used for a variety of databases.
+This is great for quickly testing out a variety of databases for performance, for example.</p>
+<p>The XML is fairly rich and permits adding more documentation about the database than the database stores itself.
+For example, you may want to document that a column is deprate or what the columns previous name was.</p>
+<p>Although you can both upload and download the metadata, it's not designed to be fully round trip,
+since the XML can store more information than most databases easily permit.</p>
+</div>
+<div class="section" id="links">
+<h1><a class="toc-backref" href="#id2" name="links">Links</a></h1>
+<p>Download <a class="reference" href="https://developer.berlios.de/project/showfiles.php?group_id=2209">Berlios download</a></p>
+<p>The main project page is at <a class="reference" href="http://developer.berlios.de/projects/xml2ddl/">Berlios</a></p>
+<p>Detailed documentation is created through the many <a class="reference" href="testdetails.html">test cases</a>.</p>
+<p>You can add comments or find some help in the <a class="reference" href="http://openfacts.berlios.de/index-en.phtml?title=XML%20to%20DDL">wiki pages</a>.</p>
+<p>I you like you can read this document in <a class="reference" href="index.pdf">PDF form</a>.</p>
+<p>My <a class="reference" href="http://scottkirkwood.blogspot.com">blog</a>.</p>
+<p>This code was written with Agile Data Modeling techniques in mind
+see also
+<a class="reference" href="http://www.sdmagazine.com/documents/s=826/sdm0302h/">Ten Steps to a Robust DB</a>, 
+<a class="reference" href="http://www.sdmagazine.com/documents/s=826/sdm0407g/">Agile Data Modeling</a>.</p>
+</div>
+<div class="section" id="installing">
+<h1><a class="toc-backref" href="#id3" name="installing">Installing</a></h1>
+<p>Requirements:</p>
+<blockquote>
+<ul class="simple">
+<li>Python 2.3</li>
+<li>Optionally, one of:<ul>
+<li>psycopg (PostgreSQL)</li>
+<li>MySQLdb (MySQL)</li>
+<li>cx_Oracle (Oracle)</li>
+<li>kinterbasdb (firebird)</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="simple-example">
+<h1><a class="toc-backref" href="#id4" name="simple-example">Simple Example</a></h1>
+<p>The following is a simple schema XML definition of a database:</p>
+<pre class="literal-block">
+&lt;schema&gt;
+    &lt;table name=&quot;students&quot; fullname=&quot;List of Students&quot; 
+        desc=&quot;List of students with their full names&quot;&gt;
+        &lt;columns&gt;
+            &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; key=&quot;1&quot;
+                desc=&quot;Primary key for the table&quot;/&gt;
+            &lt;column name=&quot;student_name&quot; fullname=&quot;Student Name&quot; type=&quot;varchar&quot; size=&quot;80&quot;
+                desc=&quot;The full name of the student&quot;/&gt;
+        &lt;/columns&gt;
+    &lt;/table&gt;
+&lt;/schema&gt;
+</pre>
+<p>Here we run the program indicating output for <a class="reference" href="http://www.postgresql.com/">PostgreSQL</a>:</p>
+<pre class="literal-block">
+xml2ddl --dbms postgres schema1.xml
+</pre>
+<p>We get the following output:</p>
+<pre class="literal-block">
+DROP TABLE students;
+CREATE TABLE students (
+        id integer,
+        student_name varchar(80),
+        CONSTRAINT pk_students PRIMARY KEY (id));
+COMMENT ON TABLE students IS 'List of students with their full names';
+COMMENT ON COLUMN students.id IS 'Primary key for the table';
+COMMENT ON COLUMN students.student_name IS 'The full name of the student';
+</pre>
+<p>If we run the program again for <a class="reference" href="http://firebird.sourceforge.net/">Firebird</a>:</p>
+<pre class="literal-block">
+xml2ddl --dbms firebird schema1.xml
+</pre>
+<p>we'll get different output:</p>
+<pre class="literal-block">
+DROP TABLE students;
+CREATE TABLE students (
+        id integer,
+        student_name varchar(80),
+        CONSTRAINT pk_students PRIMARY KEY (id));
+UPDATE RDB$RELATIONS SET RDB$DESCRIPTION = 'List of students with their full names'
+        WHERE RDB$RELATION_NAME = upper('students');
+UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = 'Primary key for the table'
+        WHERE RDB$RELATION_NAME = upper('students') AND RDB$FIELD_NAME = upper('id');
+UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = 'The full name of the student'
+        WHERE RDB$RELATION_NAME = upper('students') AND RDB$FIELD_NAME = upper('student_name');
+</pre>
+<p>The example shows a feature of <tt class="docutils literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt>, database independence.</p>
+</div>
+<div class="section" id="differencing-example">
+<h1><a class="toc-backref" href="#id5" name="differencing-example">Differencing Example</a></h1>
+<p>Another key feature is the ability to examine the changes done to the XML and generate the DDL statements necessary 
+to perform the changes to the database. If this is a new XML schema (schema2.xml):</p>
+<pre class="literal-block">
+&lt;schema&gt;
+    &lt;table name=&quot;students&quot; fullname=&quot;List of Students&quot; 
+        desc=&quot;List of students&quot;&gt;
+        &lt;columns&gt;
+            &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; key=&quot;1&quot;
+                desc=&quot;Primary key for the table&quot;/&gt;
+            &lt;column name=&quot;student_name&quot; fullname=&quot;Student Name&quot; type=&quot;varchar&quot; size=&quot;100&quot;
+                desc=&quot;The full name of the student&quot;/&gt;
+            &lt;column name=&quot;email&quot; fullname=&quot;Electronic mail address&quot; type=&quot;varchar&quot; size=&quot;100&quot;
+                desc=&quot;The primary email for the student&quot;/&gt;
+        &lt;/columns&gt;
+    &lt;/table&gt;
+&lt;/schema&gt;
+</pre>
+<p>Running this program:</p>
+<pre class="literal-block">
+diffxml2ddl --dbms postgres schema1.xml schema2.xml
+</pre>
+<p>Produces the following DDL output:</p>
+<pre class="literal-block">
+ALTER TABLE students ALTER student_name TYPE varchar(80);
+ALTER TABLE students DROP email;
+COMMENT ON TABLE students IS 'List of students with their full names';
+</pre>
+<p>However, an older version of PostgreSQL doesn't support altering the column type:</p>
+<pre class="literal-block">
+diffxml2ddl --dbms postgres7 schema1.xml schema2.xml
+</pre>
+<p>The a temporary column needs to be created, the data copied over and the old column dropped:</p>
+<pre class="literal-block">
+ALTER TABLE students ADD tmp_student_name varchar(80);
+UPDATE students SET tmp_student_name = student_name;
+ALTER TABLE students DROP student_name;
+ALTER TABLE students RENAME tmp_student_name TO student_name;
+ALTER TABLE students DROP email;
+COMMENT ON TABLE students IS 'List of students with their full names';
+</pre>
+<p>You can find a <em>complete</em> list of examples here: 
+<a class="reference" href="http://xml2ddl.berlios.de/testdetails.html">http://xml2ddl.berlios.de/testdetails.html</a></p>
+</div>
+<div class="section" id="using-a-dictionary">
+<h1><a class="toc-backref" href="#id6" name="using-a-dictionary">Using a dictionary</a></h1>
+<p>If you find yourself repeating the same attributes in your XML schema over and over you can put these
+in a dictionary:</p>
+<pre class="literal-block">
+&lt;dictionary name=&quot;column&quot;&gt;
+    &lt;dict class=&quot;key&quot; name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot; /&gt;
+&lt;/dictionary&gt;
+</pre>
+<p>In this example we are telling the parser that the dictionary is for the nodes called <tt class="docutils literal"><span class="pre">column</span></tt> and when it sees the 
+class <tt class="docutils literal"><span class="pre">key</span></tt>, it should put in the the other attributes listed.  
+So using this dictionary this would be equivalent::</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column class=&quot;key&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>as:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>In addition you can override any attributes defined in the dictionary, for example this:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column class=&quot;key&quot; name=&quot;student_id&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>would then be equivalent to:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column name=&quot;student_id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>The dictionaries can also support multiple inheritance through the <tt class="docutils literal"><span class="pre">inherits</span></tt> attribute.
+Here's a rather contrived example:</p>
+<pre class="literal-block">
+&lt;dictionary name=&quot;column&quot;&gt;
+        &lt;dict class=&quot;index&quot; type=&quot;integer&quot; null=&quot;no&quot;/&gt;
+        &lt;dict class=&quot;pk   key=&quot;1&quot;/&gt;
+        &lt;dict class=&quot;key&quot; inherits=&quot;index,pk&quot; name=&quot;id&quot; fullname=&quot;Primary Key&quot;
+                desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/dictionary&gt;
+</pre>
+</div>
+<div class="section" id="downloading-the-xml">
+<h1><a class="toc-backref" href="#id7" name="downloading-the-xml">Downloading the XML</a></h1>
+<p>You can download the XML schema directly from the database.
+Requires a connection that conforms to the <a class="reference" href="http://www.python.org/peps/pep-0249.html">Database API</a>.
+Without changing the code you can use the following connectivities:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th>Database</th>
+<th>Connectivity</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>PostgreSQL</td>
+<td><tt class="docutils literal"><span class="pre">psycopg</span></tt></td>
+</tr>
+<tr><td>MySQL</td>
+<td><tt class="docutils literal"><span class="pre">MySQLdb</span></tt></td>
+</tr>
+<tr><td>Firebird</td>
+<td><tt class="docutils literal"><span class="pre">kinterbasdb</span></tt></td>
+</tr>
+<tr><td>Oracle</td>
+<td><tt class="docutils literal"><span class="pre">cx_Oracle</span></tt></td>
+</tr>
+</tbody>
+</table>
+<p>Here's how to use the command:</p>
+<pre class="literal-block">
+downloadXml --dbms &lt;dbms&gt; --host &lt;host&gt; --database &lt;database&gt; --user &lt;user&gt; --pass &lt;pass&gt; &gt; &lt;filename.xml&gt;
+</pre>
+<p><tt class="docutils literal"><span class="pre">host</span></tt> defaults to &quot;localhost&quot; but can be another machine.</p>
+<p><tt class="docutils literal"><span class="pre">dbms</span></tt> can be one of <tt class="docutils literal"><span class="pre">postgres</span></tt>, <tt class="docutils literal"><span class="pre">mysql</span></tt>, <tt class="docutils literal"><span class="pre">oracle</span></tt> or <tt class="docutils literal"><span class="pre">firebird</span></tt>. Defaults to &quot;postgres&quot;.</p>
+<p><tt class="docutils literal"><span class="pre">database</span></tt> the name of the database, defaults to &quot;postgres&quot;</p>
+<p><tt class="docutils literal"><span class="pre">user</span></tt> the user name to connect to the database.</p>
+<p><tt class="docutils literal"><span class="pre">pass</span></tt> the password to user, defaults to &quot;postgres&quot;</p>
+<p><tt class="docutils literal"><span class="pre">filename.xml</span></tt> by default it sends the XML to the console (stdout) you can pipe the output to a file as shown above.</p>
+<p>New, is the ability to limit what is downloaded to a list of tables, views, or functions.</p>
+</div>
+<div class="section" id="outputting-html-documentation">
+<h1><a class="toc-backref" href="#id8" name="outputting-html-documentation">Outputting HTML Documentation</a></h1>
+<p>Some of the attributes in the XML are used solely for documentation purposes.
+For example, <tt class="docutils literal"><span class="pre">fullname</span></tt> has no equivalent in most DBMSs. 
+Another, it <tt class="docutils literal"><span class="pre">deprecated</span></tt> which indicates that a column or table should no longer be used, but hasn't been deleted yet.</p>
+<p>Here's how to output the HTML document:</p>
+<pre class="literal-block">
+xml2html --file schema.html schema.xml
+</pre>
+</div>
+<div class="section" id="annotated-xml">
+<h1><a class="toc-backref" href="#id9" name="annotated-xml">Annotated XML</a></h1>
+<p>The following is a list of the tags and attributes that xml2ddl accepts or 
+is planned to be accepted in the future. 
+The attributes enclosed in [square brackets] are optional. Also there are lot of thing not supported yet, and are so indicated.
+Basically, all the tags below except for &lt;schema&gt; is optional. 
+Note, as all XML files the tag names and attribute name (eg. &lt;table&gt;) is case sensitive (i.e. &lt;Table&gt; will not work!).
+Attribute, values are case insensitive, (eg. dotschema=&quot;Yes&quot; and dotschema=&quot;yes&quot; should both work).</p>
+<pre class="literal-block">
+&lt;schema&gt;
+    &lt;include/&gt;
+    ...
+    
+    &lt;dictionary&gt;
+        &lt;dict/&gt;
+        ...
+    &lt;/dictionary&gt;
+    ...
+    
+    &lt;table&gt;
+        &lt;columns&gt;
+            &lt;column/&gt;
+            ...
+        &lt;/columns&gt;
+        &lt;indexes&gt;
+            &lt;index/&gt;
+            ...
+        &lt;/indexes&gt;
+        &lt;relations&gt;
+            &lt;relation/&gt;
+            ...
+        &lt;/relations&gt;
+        &lt;contraints&gt;
+            &lt;contraint/&gt;
+            ...
+        &lt;/contraints&gt;
+        &lt;triggers&gt;
+            &lt;trigger&gt;
+                ..
+            &lt;/trigger&gt;
+            ...
+        &lt;/triggers&gt;
+    &lt;/table&gt;
+    ...
+    
+    &lt;view&gt;
+        -- view contents
+    &lt;/view&gt;
+    ...
+    
+    &lt;function&gt;
+        -- function contents.
+    &lt;/function&gt;
+    ...
+&lt;/schema&gt;
+</pre>
+<p>Here are the details of each of the XML tags.</p>
+<pre class="literal-block">
+&lt;schema [name=&quot;1&quot;] 
+        [dotshema=&quot;2&quot;]
+        [generated=&quot;3&quot;]&gt;
+</pre>
+<p>Not all databases have schemas, but you still need the tag.</p>
+<ol class="arabic simple">
+<li>The name of the schema to use.</li>
+<li>&quot;yes&quot; or &quot;no&quot;. Indicates whether the table names will require the schema name before (i.e. &quot;schema.table&quot;) 
+<strong>- Not supported</strong></li>
+<li>If set to &quot;yes&quot; indicates that the XML was generatd from <tt class="docutils literal"><span class="pre">dowloadXml</span></tt>.</li>
+</ol>
+<pre class="literal-block">
+&lt;include href=&quot;1&quot;/&gt;
+</pre>
+<p>You can use includes to break a large XML schema into smaller pieces.</p>
+<ol class="arabic simple">
+<li>Is the filename of the XML to include.</li>
+</ol>
+<pre class="literal-block">
+&lt;dictionary name=&quot;1&quot;&gt;
+    &lt;dict class=&quot;2&quot; 3=&quot;4&quot;/&gt;
+&lt;/dictionary&gt;
+</pre>
+<p>The dictionary is a general system for adding attributes.</p>
+<ol class="arabic simple">
+<li>Here you place the name of the <em>tag</em> you want to apply this to. 
+Typically, it should be applied to &quot;column&quot; but it could be &quot;table&quot;, &quot;index&quot;, etc.</li>
+<li>The classname you've given this.</li>
+<li>The attribute name to add.</li>
+<li>The value of the attribute to add.</li>
+</ol>
+<pre class="literal-block">
+&lt;table name=&quot;1&quot; 
+      [oldname=&quot;2&quot;
+      [fullname=&quot;3&quot;] 
+      [desc=&quot;4&quot;]
+      [inherits=&quot;5&quot;]&gt;
+</pre>
+<p>Create a table definition. 
+The order may be important since xml2ddl isn't too careful about creating contraints before the table exists.</p>
+<ol class="arabic simple">
+<li>The name of the database table</li>
+<li>You must enter oldname if you want to rename a table.</li>
+<li>The full name of the table, usually just the table name with spaces instead of underscores, for example. 
+This is purely for documentation purposes.</li>
+<li>A long description of the table. The description is stored in the database if possible.</li>
+<li>The idea is to specify another table which this table will inherit columns from.
+It would possibly inherit the indexes, triggers, and constraints too.
+For databases that don't support the features it will repeat the values.
+<strong>- Not supported</strong></li>
+</ol>
+<pre class="literal-block">
+&lt;columns&gt;
+    &lt;column name=&quot;1&quot; 
+           [oldname=&quot;2&quot;]
+           [fullname=&quot;3&quot;] 
+           [desc=&quot;4&quot;] 
+            type=&quot;5&quot; 
+           [size=&quot;6&quot;] 
+           [precision=&quot;7&quot;] 
+           [null=&quot;8&quot;] 
+           [unique=&quot;9&quot;]
+           [key=&quot;10&quot;] 
+           [default=&quot;11&quot;]
+           [autoincrement=&quot;12&quot;]
+           [deprecated=&quot;13&quot;]/&gt;
+    &lt;/column&gt;
+&lt;/columns&gt;
+</pre>
+<p>The &lt;columns&gt; tag gives an order list of attributes. 
+Currently, xml2ddl doesn't reorder the columns if you move things around.</p>
+<ol class="arabic simple">
+<li>Name of the column (aka attribute, aka field). 
+Note I chose the name <cite>column</cite> instead of <cite>attribute</cite> because I felt it would be easier for beginners to grasp.</li>
+<li>You need to enter the oldname if you want to rename a column.</li>
+<li>Fullname used only for documentation. Typically, it the same as <cite>name</cite> but with spaces and any hungarian notation removed.</li>
+<li>Long description of the attribute.</li>
+<li>The type of the column, should probably stick with the SQL99 types, if possible.</li>
+<li>The size of the column, used for varchar() and the like.</li>
+<li>The precision of the numeric value, must be used in conjuction with <cite>size</cite>. 
+<tt class="docutils literal"><span class="pre">type=&quot;numeric&quot;</span> <span class="pre">size=&quot;10&quot;</span> <span class="pre">precision=&quot;2&quot;</span></tt> would produce <tt class="docutils literal"><span class="pre">decimal(10,</span> <span class="pre">2)</span></tt>.</li>
+<li>&quot;yes&quot; or &quot;no&quot; or &quot;not&quot;. <tt class="docutils literal"><span class="pre">no</span></tt> or <tt class="docutils literal"><span class="pre">not</span></tt> expands to <tt class="docutils literal"><span class="pre">NOT</span> <span class="pre">NULL</span></tt>. The default is <tt class="docutils literal"><span class="pre">NULL</span></tt> if nothing is specified.</li>
+<li>If &quot;yes&quot; then the column will have a unique constraint added to it.
+The name of the constraint will be <tt class="docutils literal"><span class="pre">unique_&lt;colname&gt;</span></tt>. <strong>- Not supported</strong></li>
+<li>A number from 1 to <em>N</em>. Indicates that this column will participate in being a primary key.
+Every table <em>should</em> have a primary key, but it isn't enforced.</li>
+<li>Default value, if any. If none used, it typically defaults to NULL.</li>
+<li>If set to &quot;yes&quot; will try and make this column autoincrement if NULL is passed to in in an insert.
+On some systems I'll create a sequence and a trigger or default value.
+Typically, you will need to put in <tt class="docutils literal"><span class="pre">null=&quot;no&quot;</span></tt> and <tt class="docutils literal"><span class="pre">key=&quot;1&quot;</span></tt> as well.</li>
+<li>Value &quot;yes&quot; if used. Means that the column is deprecated and shouldn't be used (but it still exists in the database).
+This is used purely for documentation purposes.</li>
+</ol>
+<pre class="literal-block">
+&lt;colums&gt;
+    &lt;column ....&gt;
+        &lt;enumeration [name=&quot;1&quot;] [fullname=&quot;2&quot;] [desc=&quot;3&quot;] [constraint=&quot;4&quot;]&gt;
+            &lt;enum val=&quot;5&quot; [display=&quot;6&quot;] [desc=&quot;7&quot;]/&gt;
+            ...
+        &lt;/enumeration&gt;
+    &lt;/column&gt;
+&lt;/columns&gt;
+</pre>
+<p><strong>- Not supported</strong> Enumerations is a limited list of values that a column can contain.
+One purpose of enumerations is to aid in coding, to automaticaly create an enum in code, <em>forcing</em> the developer to
+use one of the enumerated types.</p>
+<ol class="arabic simple">
+<li>Name to use for the enumeration constraint, and/or the enumeration in code.</li>
+<li>Full name of the constraint, for documentation purposes.</li>
+<li>Description of the enumeration.</li>
+<li>&quot;yes&quot; if a constraint should be created if possible for the DBMS.</li>
+<li>The actual value stored in the database. Must be provided.</li>
+<li>What to typically display to the user, if omitted, assumed to be <tt class="docutils literal"><span class="pre">val</span></tt>.</li>
+<li>A long description of the value, to put in help, perhaps.</li>
+</ol>
+<pre class="literal-block">
+&lt;relations&gt;
+    &lt;relation [name=&quot;1&quot;]
+              [oldname=&quot;2&quot;]
+               column=&quot;3&quot; 
+               table=&quot;4&quot; 
+              [fk=&quot;5&quot;] 
+              [ondelete=&quot;6&quot;] 
+              [onupdate=&quot;7&quot;]/&gt;
+&lt;/relations&gt;
+</pre>
+<p>Relations is an unordered list of foreign key contraints to other tables and columns.
+For DBMS that don't support this, the relations would be used only for documentation purposes.</p>
+<ol class="arabic simple">
+<li>The name of the constraint, defaults to <tt class="docutils literal"><span class="pre">fk_&lt;column&gt;</span></tt> if not provided.</li>
+<li>If you rename the relation need to put the original name here. <strong>- Not supported</strong>.</li>
+<li>The list of columns of this table that forms part of the relation separated by commas.
+Note I may either change the name to <tt class="docutils literal"><span class="pre">columns</span></tt> or just support both <tt class="docutils literal"><span class="pre">column</span></tt> and <tt class="docutils literal"><span class="pre">columns</span></tt>.</li>
+<li>The name of the other table that forms part of the relation.</li>
+<li>The name of the other columns that form part of the relation, separated by commas.
+If no name is given it defaults to the same name(s) as given in column.</li>
+<li>If used should pass <tt class="docutils literal"><span class="pre">cascade</span></tt> or <tt class="docutils literal"><span class="pre">setnull</span></tt>.</li>
+<li>If used should pass <tt class="docutils literal"><span class="pre">cascade</span></tt> or <tt class="docutils literal"><span class="pre">setnull</span></tt>.</li>
+</ol>
+<pre class="literal-block">
+&lt;indexes&gt;
+    &lt;index [name=&quot;1&quot;] 
+           [oldname=&quot;2&quot;]
+            columns=&quot;3&quot; 
+           [unique=&quot;4&quot;]
+           [using=&quot;5&quot;]
+           [where=&quot;6&quot;]/&gt;
+&lt;/indexes&gt;
+</pre>
+<p>Index are an unorder list of indexes on a table (i.e. the order of the &lt;index/&gt; tags does not matter).</p>
+<ol class="arabic simple">
+<li>The name of the index. Defaults to <tt class="docutils literal"><span class="pre">idx_&lt;table&gt;&lt;columns&gt;</span></tt> where the columns are separeted by underscores.</li>
+<li>Must provide the old name if you want to rename the index <strong>- Not supported</strong></li>
+<li>List of columns that form part of the index separated by commas.</li>
+<li>If set to &quot;yes&quot; then it creates a unique index. <strong>- Not supported</strong></li>
+<li>Type of index to create. <strong>- Not supported</strong></li>
+<li>Where clause. <strong>- Not supported</strong></li>
+</ol>
+<pre class="literal-block">
+&lt;constraints&gt;
+    &lt;constraint [name=&quot;1&quot;] 
+                [oldname=&quot;2&quot;]
+                [longname=&quot;3&quot;]
+                [desc=&quot;4&quot;]
+                 columns=&quot;5&quot; 
+                [unique=&quot;6&quot;] 
+                [check=&quot;7&quot;]/&gt;
+&lt;/constraints&gt;
+</pre>
+<p>The &lt;constraints&gt; tag lists an unorder list of contraint rules, if the database supports it. <strong>- Not supported</strong></p>
+<ol class="arabic simple">
+<li>The name of the constraint. 
+Defaults to <tt class="docutils literal"><span class="pre">con_&lt;table&gt;&lt;columns&gt;</span></tt> where the columns are separeted by underscores.
+<strong>- Not supported</strong></li>
+<li>If you rename the constraint you must put the old name here. <strong>- Not supported</strong></li>
+<li>The long name of the constraint if any (for documentation only)</li>
+<li>The description of the constraint, for documentation.</li>
+<li>List of columns that form part of the constaint separated by commas <strong>- Not supported</strong></li>
+<li>If <tt class="docutils literal"><span class="pre">yes</span></tt> means it's a unique constraint <strong>- Not supported</strong></li>
+<li>If set, it's a check constraint <strong>- Not supported</strong></li>
+</ol>
+<pre class="literal-block">
+&lt;triggers&gt;
+    &lt;trigger  name=&quot;1&quot;
+             [oldname=&quot;2&quot;]
+             [longname=&quot;3&quot;]
+             [desc=&quot;4&quot;]
+              timing=&quot;5&quot; 
+              events=&quot;6&quot;
+             [fire=&quot;7&quot;]
+             [function=&quot;8&quot;]&gt;
+        (9)
+    &lt;/trigger&gt;
+&lt;/triggers&gt;
+</pre>
+<p><strong>- Not supported</strong>
+The &lt;triggers&gt; tag lists an unorder list of triggers for the table, if the database supports it.</p>
+<ol class="arabic simple">
+<li>The name of the trigger, required.</li>
+<li>If you rename the trigger must put the old name here.</li>
+<li>The long name of the trigger, if any (for documentation only)</li>
+<li>The description of the trigger for documentation purposes.</li>
+<li>The timing of the trigger, one of 'before' | 'after'</li>
+<li>The events that causes the trigger. One of 'insert', 'update', or 'delete'. 
+Multiple events can be specified by separating with commas.</li>
+<li>Specifies whether the trigger fires 'once' or 'per-row'.</li>
+<li>The name of an existing function to call on the trigger event, if the database supports this.</li>
+<li>The body of the trigger. Can't have used <tt class="docutils literal"><span class="pre">function</span></tt> as well, it's one or the other.</li>
+</ol>
+<pre class="literal-block">
+&lt;dataset [only=&quot;1&quot;]&gt;
+    &lt;val 2=&quot;3&quot;/&gt;
+&lt;/dataset&gt;
+</pre>
+<p>A dataset is a set of data that should be in the table.
+Useful, when you need to store a small set of values in the table.</p>
+<ol class="arabic simple">
+<li>If set to true, the program will clean out the table before inserting the values.</li>
+<li>The left hand side of the equals is the name of the column to store this data value</li>
+<li>The right hand side of the equals is the value to store in this data cell.
+For example, <tt class="docutils literal"><span class="pre">&lt;val</span> <span class="pre">id=&quot;1&quot;</span> <span class="pre">name=&quot;Bob&quot;/&gt;</span></tt> creates <tt class="docutils literal"><span class="pre">INSERT</span> <span class="pre">INTO</span> <span class="pre">table</span> <span class="pre">(id,</span> <span class="pre">name)</span> <span class="pre">VALUES</span> <span class="pre">(1,</span> <span class="pre">'Bob')</span></tt></li>
+</ol>
+<pre class="literal-block">
+&lt;view name=&quot;1&quot; 
+     [fullname=&quot;2&quot;] 
+     [oldname=&quot;3&quot;]
+     [desc=&quot;4&quot;] 
+     [columns=&quot;5&quot;]&gt;
+    (6)
+&lt;/view&gt;
+</pre>
+<p>Create a view to the table.  (new)</p>
+<ol class="arabic simple">
+<li>Name of the view to be stored in the database.</li>
+<li>Typically, this is the name with spaces added.</li>
+<li>Old view name which is required if you want to rename the view.</li>
+<li>A full description of the view.</li>
+<li>You can optionally specify the column names, but most DBMS can infer them from the select statement. <strong>- Not supported</strong></li>
+<li>The contents of the view.</li>
+</ol>
+<pre class="literal-block">
+&lt;function name=&quot;1&quot; 
+         [oldname=&quot;2&quot;]
+         [fullname=&quot;3&quot;] 
+         [desc=&quot;4&quot;] 
+         [arguments=&quot;5&quot;] 
+         [returns=&quot;6&quot;] 
+         [language=&quot;7&quot;] 
+         [dbms=&quot;8&quot;] 
+         [volatile=&quot;9&quot;]&gt;
+    (10)
+&lt;/function&gt;
+</pre>
+<p>You can specify the body of a stored procedure or function.</p>
+<ol class="arabic simple">
+<li>Name of the function or procedure to be stored in the database.</li>
+<li>If you rename the function you must place the old name here. <strong>- Not supported</strong></li>
+<li>Typically, this is the name with spaces added.</li>
+<li>A full description of the function.</li>
+<li>Comma separeted list of arguments. If no arguments, void is assumed.</li>
+<li>If <tt class="docutils literal"><span class="pre">returns</span></tt> is not there or empty it's considered a procedure.</li>
+<li>Language is assumed &quot;SQL&quot; or &quot;PL/SQL&quot; if not specified.</li>
+<li>Because the code is likely to change depending on the database system used you could specify
+the same function multiple times, one for each type of DBMS.
+If not ther all dbms systems are assumed.</li>
+<li>Can be &quot;yes&quot;, &quot;no&quot;, or &quot;stable&quot;. This is an execution hint for PostgreSQL. <strong>- Not supported</strong></li>
+<li>The contents of the function or procedure.</li>
+</ol>
+</div>
+<div class="section" id="advantages">
+<h1><a class="toc-backref" href="#id10" name="advantages">Advantages</a></h1>
+<p>Storing the schema in this form has some advantages:</p>
+<ol class="arabic simple">
+<li>All the information about a table is stored together in one place. 
+Finding linked tables, sequence tables etc. should be simplified.</li>
+<li>Being text it can easily be stored in a VCS Repository, like <a class="reference" href="http://subversion.tigris.org/">Subversion</a> or <a class="reference" href="https://www.cvshome.org/">CVS</a>.</li>
+<li>Also because it is text you can compare differences between older and newer versions.
+In fact this is one of the main goals of this project.</li>
+<li>Since the description of the schema is abstract, it isn't tied to a specific database.</li>
+<li>Documentation can easily be generated from the XML schema.</li>
+<li>A pretty schema diagram can be drawn from the XML 
+<a class="reference" href="http://www.lysator.liu.se/~alla/dia/">see Dia</a> and <a class="reference" href="http://www.graphviz.org/">Dot</a> 
+(note, this functionality hasn't been implemented yet).</li>
+<li>A history of changes made to the table (by whom, when and why) can all be contained in the repository.
+Normally, metadata changes made to a database never stored anywhere.</li>
+<li>Migration scripts can be stored in the meta-data for certain changes that require the data to be modified.
+For example, if a column is split into two columns the procedure to make this modification can be
+stored into the repository (not implemented yet).</li>
+<li>Destructive changes can have backed ups made as part of its process. 
+For example, if a column is to be deleted that column along with its primary key(s) can be stored into a file.
+This way if they do undo the changes they can do so without needing to go to a full backup. (to do)</li>
+<li>Additional useful information can be stored in the XML.
+Columns can be flagged as deprecated or obsolete, for example.</li>
+<li>Scripts can be generated to automatically check that the data fits the domain.  
+For example, that status is 1, 2, 3, or 4 or that telephone numbers are in the format (999) 9999-99999. (to do)</li>
+<li>Code can use the XML to it's own purposes.
+One example is to write code that figures out the best joins to use between two tables.
+Another example is to change a status code (ex. 1, 2, or 3) into an enumeration (ex. READY, PROCESSING, DONE).</li>
+</ol>
+</div>
+<div class="section" id="to-do">
+<h1><a class="toc-backref" href="#id11" name="to-do">To do</a></h1>
+<p>Here are the major directions I see <tt class="docutils literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> going:</p>
+<ul class="simple">
+<li>Support for more databases (currently I've written code only for PostgreSQL, Firebird, and MySQL).
+Note for Firebird users, there is a chance I'll temporarily drop support for Firebird and fill out the feature set for MySQL and PostgreSQL first.
+For MySQL users I'll probably drop support for versions before 5.0.
+I'm really hoping that others will step up and implement the support for their favorite DBMS once I have good support done for these two
+DBMSs.</li>
+<li>Build the XML schema from an existing database. 
+Basic implementations for Postgres, MySQL, and Firebird is already done.</li>
+<li>Support comparing differences from the database as well as another XML file.  This is a bit different since the 
+database may be more up-to-date, but the XML probably has more information (like fullname).</li>
+<li>Support for some database specific features.</li>
+<li>Hooks for developers to put in their own code on certain events.</li>
+<li>Filling out the missing funcionality listed above as listed as '<strong>- Not supported</strong>'.</li>
+</ul>
+</div>
+<div class="section" id="similar-work">
+<h1><a class="toc-backref" href="#id12" name="similar-work">Similar Work</a></h1>
+<p>I've been pointed to another project which looks similar calle <a class="reference" href="http://erw.dsi.unimi.it/">ERW</a> 
+A quick look shows that it tries to work at a higher level than my XML does (i.e. more abstract).
+It also generates code for PHP and produces nicer documentation.</p>
+<p>Written in the Perl programming language is <a class="reference" href="http://sqlfairy.sourceforge.net/">SQL Fairy</a>.
+It seems to do a lot of what I'm doing but is even larger in scope.</p>
+</div>
+</div>
+<hr class="docutils footer" />
+<div class="footer">
+Generated on: 2005-09-29.
+Generated by <a class="reference" href="http://docutils.sourceforge.net/">Docutils</a> from <a class="reference" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> source.
+</div>
+</body>
+</html>

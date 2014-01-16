@@ -1,0 +1,11 @@
+<schema>
+    <table name="students" fullname="List of Students" 
+        desc="List of students with their full names">
+        <columns>
+            <column name="id" fullname="Primary Key" type="integer" key="1"
+                desc="Primary key for the table"/>
+            <column name="student_name" fullname="Student Name" type="varchar" size="80"
+                desc="The full name of the student"/>
+        </columns>
+    </table>
+</schema>

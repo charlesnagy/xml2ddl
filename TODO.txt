@@ -1,0 +1,39 @@
+
+Things That Need to be Done
+---------------------------
+
+- Invalid schemas should not be accepted without warnings:
+  + Columns without a type should be warned
+  + varchar, decimal etc. without a size should be warned.
+  + Too long object names should be warned.
+  + Relations to tables/columns that don't exist should be warned.
+  + key="n" values that repeat should be warned (ie. two or more columns with the same N in the same table)
+
+- To test:
+  + Warnings of the above conditions
+  + Keys="n" out of order are still put in correct order
+
+- Enumerations - I think this would be really cool:
+  + Ability to put enumeration on a column with option to put a constraint on it.
+  + Enumerations should have value="1" name="Name" desc="Description" default="true"
+  + where name is mandatory, value is assumed name if value missing. Default changes the columns default.
+
+- Check constraints - todo
+
+- Unique constraint - todo
+
+- Triggers - todo
+
+- Lint of Schema the ability to check the schema for:
+  + Not following naming conventions (of your choosing)
+  + Column types that repeat more than 3 times without using a dictionary
+  + Non portable data types (like varchar2)
+  + Un-indexed tables
+
+- Allow some alias name for columns. Like column and columns for relations
+
+- Order the DDLs by dependancies.
+
+- Ordering of table columns to match ordering in XML
+
+

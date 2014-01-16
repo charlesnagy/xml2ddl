@@ -1,0 +1,3 @@
+#!python
+import xml2ddl.xml2ddl
+xml2ddl.xml2ddl.parseCommandLine()

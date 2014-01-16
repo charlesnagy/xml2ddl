@@ -1,0 +1,3 @@
+#!python
+import xml2ddl.diffxml2ddl
+xml2ddl.diffxml2ddl.parseCommandLine()

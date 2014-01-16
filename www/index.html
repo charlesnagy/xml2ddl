@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.3.1: http://docutils.sourceforge.net/" />
+<title>XML To DDL</title>
+<meta content="XML, DDL, databases, generation" name="keywords" />
+<meta content="Creating DDL statements from XML" lang="en" name="description" />
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="xml-to-ddl">
+<h1 class="title">XML To DDL</h1>
+<p>''Bringing some sanity to database maintenance.''</p>
+<div class="contents topic" id="table-of-contents">
+<p class="topic-title"><a name="table-of-contents">Table of Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#introduction" id="id1" name="id1">Introduction</a></li>
+<li><a class="reference" href="#simple-example" id="id2" name="id2">Simple Example</a></li>
+<li><a class="reference" href="#differencing-example" id="id3" name="id3">Differencing Example</a></li>
+<li><a class="reference" href="#using-a-dictionary" id="id4" name="id4">Using a dictionary</a></li>
+<li><a class="reference" href="#outputting-html-documentation" id="id5" name="id5">Outputting HTML Documentation</a></li>
+<li><a class="reference" href="#advantages" id="id6" name="id6">Advantages</a></li>
+<li><a class="reference" href="#to-do" id="id7" name="id7">To do</a></li>
+</ul>
+</div>
+<div class="section" id="introduction">
+<h1><a class="toc-backref" href="#id1" name="introduction">Introduction</a></h1>
+<p><tt class="literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> is a set of python programs to convert an XML representation of a database into a 
+set of <a class="reference" href="http://http://en.wikipedia.org/wiki/Data_Definition_Language">DDL</a> (Data Definition Language) statements.</p>
+<p>In addition <tt class="literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> can examine the difference between two XML files and output a sequence of ALTER statements that
+will update the database to conform to the new schema.</p>
+<p>Finallly, <tt class="literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> can generate HTML documentation of your schema.</p>
+<p>You can find more information and download files at the <a class="reference" href="http://developer.berlios.de/projects/xml2ddl/">Berlios page</a></p>
+</div>
+<div class="section" id="simple-example">
+<h1><a class="toc-backref" href="#id2" name="simple-example">Simple Example</a></h1>
+<p>The following is a simple schema XML definition of a database:</p>
+<pre class="literal-block">
+&lt;schema&gt;
+    &lt;table name=&quot;students&quot; fullname=&quot;List of Students&quot; 
+        desc=&quot;List of students with their full names&quot;&gt;
+        &lt;columns&gt;
+            &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; inherits=&quot;index&quot; key=&quot;1&quot;
+                desc=&quot;Primary key for the table&quot;/&gt;
+            &lt;column name=&quot;student_name&quot; fullname=&quot;Student Name&quot; class=&quot;name&quot; 
+                desc=&quot;The full name of the student Can this span multiple lines?&quot;/&gt;
+        &lt;/columns&gt;
+    &lt;/table&gt;
+&lt;/schema&gt;
+</pre>
+<p>Here we run the program indicating output for <a class="reference" href="http://www.postgresql.com/">PostgreSQL</a>:</p>
+<pre class="literal-block">
+python xml2ddl.py --dbms postgres schema1.xml
+</pre>
+<p>We get the following output:</p>
+<pre class="literal-block">
+DROP TABLE students;
+CREATE TABLE students (
+            id integer,
+            student_name varchar(80),
+            CONSTRAINT pk_students PRIMARY KEY (id));
+COMMENT ON TABLE students IS 'List of students with their full names';
+COMMENT ON COLUMN students.id IS 'Primary key for the table';
+COMMENT ON COLUMN students.student_name IS 'The full name of the student';
+</pre>
+<p>If we run the program again for <a class="reference" href="http://firebird.sourceforge.net/">Firebird</a>:</p>
+<pre class="literal-block">
+python xml2ddl.py --dbms firebird schema1.xml
+</pre>
+<p>we'll get different output:</p>
+<pre class="literal-block">
+DROP TABLE students;
+CREATE TABLE students (
+        id integer,
+        student_name varchar(80),
+CONSTRAINT pk_students PRIMARY KEY (id));
+UPDATE RDB$RELATIONS SET RDB$DESCRIPTION = 'List of students with their full names'
+        WHERE RDB$RELATION_NAME = upper('students');
+UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = 'Primary key for the table'
+        WHERE RDB$RELATION_NAME = upper('students') AND RDB$FIELD_NAME = upper('id');
+UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = 'The full name of the student'
+        WHERE RDB$RELATION_NAME = upper('students') AND RDB$FIELD_NAME = upper('student_name');
+</pre>
+<p>The example shows a feature of <tt class="literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt>, database independence. 
+Currently the program supports the <a class="reference" href="http://firebird.sourceforge.net/">Firebird</a>, <a class="reference" href="http://www.postgresql.com/">PostgreSQL</a>, and <a class="reference" href="http://www.mysql.com/">MySQL</a> databases, but more will probably become available.</p>
+</div>
+<div class="section" id="differencing-example">
+<h1><a class="toc-backref" href="#id3" name="differencing-example">Differencing Example</a></h1>
+<p>Another key feature is the ability to examine the changes done to the XML and generate the DDL statements necessary 
+to perform the changes to the database. If this is a new XML schema:</p>
+<pre class="literal-block">
+&lt;schema&gt;
+        &lt;table name=&quot;students&quot; fullname=&quot;List of Students&quot; 
+                desc=&quot;List of students with their full names&quot;&gt;
+                &lt;columns&gt;
+                        &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; key=&quot;1&quot;
+                                desc=&quot;Primary key for the table&quot;/&gt;
+                        &lt;column name=&quot;student_name&quot; fullname=&quot;Student Name&quot; type=&quot;varchar&quot; size=&quot;80&quot;
+                                desc=&quot;The full name of the student&quot;/&gt;
+                &lt;/columns&gt;
+        &lt;/table&gt;
+&lt;/schema&gt;
+</pre>
+<p>Running this program:</p>
+<pre class="literal-block">
+diffxml2ddl.py --dbms postgres schema2.xml schema1.xml
+</pre>
+<p>Produces the following DDL output:</p>
+<pre class="literal-block">
+ALTER TABLE students ALTER student_name TYPE varchar(100);
+ALTER TABLE students ADD email varchar(100);
+COMMENT ON TABLE students IS 'List of students';
+</pre>
+<p>However, an older version of PostgreSQL doesn't support altering the column type:</p>
+<pre class="literal-block">
+python diffxml2ddl.py --dbms postgres7 schema2.xml schema1.xml
+</pre>
+<p>The a temporary column needs to be created, the data copied over and the old column dropped:</p>
+<pre class="literal-block">
+ALTER TABLE students ADD tmp_student_name varchar(80);
+UPDATE students SET tmp_student_name = student_name;
+ALTER TABLE students DROP student_name;
+ALTER TABLE students RENAME tmp_student_name TO student_name;
+ALTER TABLE students DROP email;
+COMMENT ON TABLE students IS 'List of students with their full names';
+</pre>
+</div>
+<div class="section" id="using-a-dictionary">
+<h1><a class="toc-backref" href="#id4" name="using-a-dictionary">Using a dictionary</a></h1>
+<p>If you find yourself repeating the same attributes in your XML schema over and over you can put these
+in a dictionary:</p>
+<pre class="literal-block">
+&lt;dictionary name=&quot;column&quot;&gt;
+    &lt;dict class=&quot;key&quot; name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot; /&gt;
+&lt;/dictionary&gt;
+</pre>
+<p>In this example we are telling the parser that the dictionary is for the nodes called <tt class="literal"><span class="pre">column</span></tt> and when it sees the 
+class <tt class="literal"><span class="pre">key</span></tt>, it should put in the the other attributes listed.  
+So using this dictionary this would be equivalent::</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column class=&quot;key&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>as:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column name=&quot;id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>In addition you can override any attributes in the dictionary, for example this:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column class=&quot;key&quot; name=&quot;student_id&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>would then be equivalent to:</p>
+<pre class="literal-block">
+...
+&lt;columns&gt;
+    &lt;column name=&quot;student_id&quot; fullname=&quot;Primary Key&quot; type=&quot;integer&quot; null=&quot;no&quot; key=&quot;1&quot;
+        desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/columns&gt;
+...
+</pre>
+<p>The dictionaries can also support multiple inheritance through the <tt class="literal"><span class="pre">inherits</span></tt> attribute.
+Here's a rather contrived example:</p>
+<pre class="literal-block">
+&lt;dictionary name=&quot;column&quot;&gt;
+        &lt;dict class=&quot;index&quot; type=&quot;integer&quot; null=&quot;no&quot;/&gt;
+        &lt;dict class=&quot;pk   key=&quot;1&quot;/&gt;
+        &lt;dict class=&quot;key&quot; inherits=&quot;index,pk&quot; name=&quot;id&quot; fullname=&quot;Primary Key&quot;
+                desc=&quot;Primary key for the table&quot;/&gt;
+&lt;/dictionary&gt;
+</pre>
+</div>
+<div class="section" id="outputting-html-documentation">
+<h1><a class="toc-backref" href="#id5" name="outputting-html-documentation">Outputting HTML Documentation</a></h1>
+<p>Some of the attributes in the XML are used solely for documentation purposes.
+For example, <tt class="literal"><span class="pre">fullname</span></tt> has no equivalent in most DBMSs. 
+Another, it <tt class="literal"><span class="pre">deprecated</span></tt> which indicates that a column or table should no longer be used, but hasn't been deleted yet.</p>
+<p>Here's how to output the HTML document:</p>
+<pre class="literal-block">
+python xml2html.py --file schema.html schema.xml
+</pre>
+</div>
+<div class="section" id="advantages">
+<h1><a class="toc-backref" href="#id6" name="advantages">Advantages</a></h1>
+<p>Storing the schema in this form has some advantages:</p>
+<ol class="arabic simple">
+<li>All the information about a table is stored together in one place. 
+Finding linked tables, sequence tables etc. should be simplified.</li>
+<li>Being text it can easily be stored in a VCS Repository, like <a class="reference" href="http://subversion.tigris.org/">Subversion</a> or <a class="reference" href="https://www.cvshome.org/">CVS</a>.</li>
+<li>Also because it is text you can compare differences between older and newer versions.
+In fact this is one of the main goals of this project.</li>
+<li>Since the description of the schema is abstract, it isn't tied to a specific database.</li>
+<li>Documentation can easily be generated from the XML schema.</li>
+<li>A pretty schema diagram can be drawn from the XML 
+<a class="reference" href="http://www.lysator.liu.se/~alla/dia/">see Dia</a> and <a class="reference" href="http://www.graphviz.org/">Dot</a> 
+(note, this functionality hasn't been implemented yet).</li>
+<li>A history of changes made to the table (by whom, when and why) can all be contained in the repository.
+Normally, metadata changes made to a database never stored anywhere.</li>
+<li>Migration scripts can be stored in the meta-data for certain changes that require the data to be modified.
+For example, if a column is split into two columns the procedure to make this modification can be
+stored into the repository (not implemented yet).</li>
+<li>Destructive changes can have backed ups made as part of its process. 
+For example, if a column is to be deleted that column along with its primary key(s) can be stored into a file.
+This way if they do undo the changes they can do so without needing to go to a full backup. (to do)</li>
+<li>Additional useful information can be stored in the XML.
+Columns can be flagged as deprecated or obsolete, for example.</li>
+<li>Scripts can be generated to automatically check that the data fits the domain.  
+For example, that status is 1, 2, 3, or 4 or that telephone numbers are in the format (999) 9999-99999. (to do)</li>
+<li>Code can use the XML to it's own purposes.
+One example is to write code that figures out the best joins to use between two tables.
+Another example is to change a status code (ex. 1, 2, or 3) into an enumeration (ex. READY, PROCESSING, DONE).</li>
+</ol>
+</div>
+<div class="section" id="to-do">
+<h1><a class="toc-backref" href="#id7" name="to-do">To do</a></h1>
+<p>Here are the major directions I see <tt class="literal"><span class="pre">XML</span> <span class="pre">to</span> <span class="pre">DDL</span></tt> going:</p>
+<ul class="simple">
+<li>Support for more databases (currently I've written code only for PostgreSQL, Firebird, and MySQL).</li>
+<li>Build the XML schema from an existing database.</li>
+<li>Support comparing differences from the database as well as another XML file.</li>
+<li>More test cases.</li>
+<li>Support for database specific features</li>
+</ul>
+</div>
+</div>
+<hr class="footer" />
+<div class="footer">
+Generated on: 2004-09-10.
+Generated by <a class="reference" href="http://docutils.sourceforge.net/">Docutils</a> from <a class="reference" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a> source.
+</div>
+</body>
+</html>

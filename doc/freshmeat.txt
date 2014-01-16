@@ -1,0 +1,18 @@
+Project: xml2ddl
+Version: 0.1
+Release-Focus: Initial freshmeat announcement
+Hide: N
+Home-Page-URL: http://www.catb.org/~esr/doclifter/
+Gzipped-Tar-URL: http://www.catb.org/~esr/doclifter/doclifter-1.1.tar.gz
+RPM-URL: http://www.catb.org/~esr/doclifter/doclifter-1.1-1.i386.rpm
+
+Fixed a bug in conditional evaluation that twadmin(8) tickled.  Better
+detection of pure inclusions. Better blank-section elimination.
+Kleene star recognized as ... synonym in command synopses.  Correct
+some bugs in semantic-hint collection.  Recognize Qt manual pages and
+use their conventions.  Better lifting of mandoc-generated
+pages. Translate groff-style \[...] escapes, flag unknown ones.  Can
+now parse K&R style function prototypes as well as ANSI ones. This
+version lifts 96% of 9829 manual pages in a full Red Hat 9
+installation with Fedora updates to *validated* XML-DocBook.
+

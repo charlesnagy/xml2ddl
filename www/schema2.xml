@@ -1,0 +1,13 @@
+<schema>
+    <table name="students" fullname="List of Students" 
+        desc="List of students">
+        <columns>
+            <column name="id" fullname="Primary Key" type="integer" key="1"
+                desc="Primary key for the table"/>
+            <column name="student_name" fullname="Student Name" type="varchar" size="100"
+                desc="The full name of the student"/>
+            <column name="email" fullname="Electronic mail address" type="varchar" size="100"
+                desc="The primary email for the student"/>
+        </columns>
+    </table>
+</schema>

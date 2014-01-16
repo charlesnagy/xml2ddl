@@ -1,0 +1,51 @@
+    == Welcome ==
+    
+    For reference there's the
+    [http://developer.berlios.de/projects/xml2ddl the project page]
+    and the
+    [http://xml2ddl.berlios.de/ web site] that you can also go to.
+    
+    = Motivation =
+    
+    I suppose the motivation for this project was seeing how 
+    [http://en.wikipedia.org/wiki/Version_control_system version control systems] (VCS)
+    have worked so well for multiple software developers to work together on a project
+    but have never seen the equivalent thing done for databases.
+    Then I started thinking that if you used XML to represent the database
+    you could store the XML in the repository (i.e. VCS). 
+    
+    Another thing that annoyed me is that nearly every database has a different
+    way to create or to view it's meta data.
+    It is odd that systems that are designed to manage your data does such a poor
+    job of managing it's own meta data.
+    
+    = Problems =
+    
+    Programmers don't give the diffs to the compiler and expect it to just modify the bites in
+    the executable that changed.  
+    No, the executable is basically built from scratch each time.
+    With databases, however, XML to DDL wants only to the meta data, not the underlying data
+    if possible. 
+    Even if we could rebuild the tables from scratch each time, there's a real resource
+    issues in doing this.
+    
+    Thus XML to DDL must try and be smarter about applying only the minimum number of changes
+    required to update the database to the new XML schema.
+    
+    = Benefits =
+    
+    I thought about storing only the 
+    [http://en.wikipedia.org/wiki/Data_Definition_Language DDL] 
+    SQL statements (like ALTER TABLE, etc.) in the repository,
+    but a XML representation of the schema has some additional benefits.
+    
+    The most obvious one is that HTML or PDF documents can be generated from the XML.
+    You could also build pretty diagrams as well.
+    (Please note I don't intend to do this part)
+    
+    Another Idea I had recently is to read in this schema so that the code would know
+    about the columns and tables and could help you build the queries.
+    For example, you could specify the tables and columns and it would 
+    apply the joins for you (if possible).
+    
+    

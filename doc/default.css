@@ -1,0 +1,390 @@
+/*
+:Author: David Goodger
+:Contact: goodger@users.sourceforge.net
+:date: $Date: 2004/01/28 20:46:38 $
+:version: $Revision: 1.36 $
+:copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+SAK stuff added by Scott Kirkwood
+Stolen from Asciidoc
+*/
+
+body {
+    background: #dedede url("logo.gif") top left no-repeat fixed;
+    margin: 0;
+    min-height: 480px;
+}
+
+.first {
+    margin-top: 0;
+}
+
+.last {
+    margin-bottom: 0;
+}
+
+a.toc-backref {
+    text-decoration: none ;
+    color: black;
+}
+
+blockquote.epigraph {
+    margin: 2em 5em;
+}
+
+dd {
+    margin-bottom: 0.5em;
+}
+
+div.abstract {
+    margin: 2em 5em;
+}
+
+div.abstract p.topic-title {
+    font-weight: bold ;
+}
+
+div.attention, div.caution, div.danger, div.error, div.hint,
+div.important, div.note, div.tip, div.warning, div.admonition {
+    border: 3px solid #1f764c;    /* Olive green */
+    padding: 0em 0.5em 1em 1em;
+    margin: 0.5em 15% 0.5em 0;
+}
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+    color: red ;
+    font-weight: bold ;
+    font-family: sans-serif;
+}
+
+div.hint p.admonition-title, div.important p.admonition-title,
+div.note p.admonition-title, div.tip p.admonition-title,
+div.admonition p.admonition-title {
+    font-weight: bold ;
+    font-family: sans-serif;
+}
+
+div.dedication {
+    margin: 2em 5em ;
+    text-align: center ;
+    font-style: italic;
+}
+
+div.dedication p.topic-title {
+    font-weight: bold ;
+    font-style: normal;
+}
+
+div.figure {
+    margin-left: 2em;
+}
+
+div.header {
+    font-size: smaller;
+}
+
+div.sidebar {
+    margin: 0.5em 15% 0.5em 0;
+    padding: 0.5em 1em;
+    border: 1px solid gray;
+    background-color: #ffffee ;
+}
+
+div.sidebar p.rubric {
+    font-family: sans-serif ;
+    font-size: medium;
+}
+
+div.system-messages {
+    margin: 5em;
+}
+
+div.system-messages h1 {
+    color: red;
+}
+
+div.system-message {
+    border: medium outset ;
+    padding: 1em;
+}
+
+div.system-message p.system-message-title {
+    color: red ;
+    font-weight: bold;
+}
+
+div.topic {
+    margin: 0em;
+}
+
+h1,h2,h3,h4,h5 {
+    text-align: left;
+    background: transparent;
+    font-family: Tahoma, Verdana, sans-serif;
+    font-weight: bold;
+    margin-top: .8em;
+}
+
+/* SAK */
+h1.title {
+    padding: 0.5em 0 0.5em 1em;
+    color: white;
+    background: #1f764c;    /* Olive green */
+    margin: 0 -0.5em 0 -1em;
+    border-bottom: solid 1px black;
+}
+
+hr {
+    width: 75%; 
+}
+
+ol.simple, ul.simple {
+    margin-bottom: 1em;
+}
+
+ol.arabic {
+    list-style: decimal;
+}
+
+ol.loweralpha {
+    list-style: lower-alpha;
+}
+
+ol.upperalpha {
+    list-style: upper-alpha;
+}
+
+ol.lowerroman {
+    list-style: lower-roman;
+}
+
+ol.upperroman {
+    list-style: upper-roman;
+}
+
+p.attribution {
+    text-align: right ;
+    margin-left: 50%;
+}
+
+p.caption {
+    font-style: italic;
+}
+
+p.credits {
+    font-style: italic ;
+    font-size: smaller;
+}
+
+p.label {
+    white-space: nowrap;
+}
+
+p.rubric {
+    font-weight: bold ;
+    font-size: larger ;
+    color: maroon ;
+    text-align: center;
+}
+
+p.sidebar-title {
+    font-family: sans-serif ;
+    font-weight: bold ;
+    font-size: larger;
+}
+
+p.sidebar-subtitle {
+    font-family: sans-serif ;
+    font-weight: bold;
+}
+
+p.topic-title {
+    font-weight: bold;
+    font-family: Tahoma, Verdana, sans-serif;
+    font-size: 200%;
+}
+
+/*
+.admonition-title {
+  display: none;
+}
+*/
+
+pre.address {
+    margin-bottom: 0 ;
+    margin-top: 0 ;
+    font-family: serif ;
+    font-size: 100%;
+}
+
+pre.line-block {
+    font-family: serif ;
+    font-size: 100%;
+}
+
+pre.literal-block, pre.doctest-block {
+    margin-right: 2em;
+    background-color: #eeeeee;
+}
+
+span.classifier {
+    font-family: sans-serif ;
+    font-style: oblique;
+}
+
+span.classifier-delimiter {
+    font-family: sans-serif ;
+    font-weight: bold;
+}
+
+span.interpreted {
+    font-family: sans-serif;
+}
+
+span.option {
+    white-space: nowrap;
+}
+
+span.option-argument {
+    font-style: italic;
+}
+
+span.pre {
+    white-space: pre;
+}
+
+span.problematic {
+    color: red;
+}
+
+table {
+    margin-top: 0.5em ;
+    margin-bottom: 0.5em;
+}
+
+table.citation {
+    border-left: solid thin gray ;
+    padding-left: 0.5ex;
+}
+
+table.docinfo {
+    margin-bottom: 0;
+    margin: 0px 48px 0 140px;
+}
+
+table.footnote {
+/*  border-left: solid thin black ; */
+    padding-left: 0.5ex;
+}
+
+td, th {
+    padding-left: 0.5em ;
+    padding-right: 0.5em ;
+    vertical-align: top;
+}
+
+th.docinfo-name, th.field-name {
+    font-weight: bold ;
+    text-align: left ;
+    white-space: nowrap;
+}
+
+h1 tt, h2 tt, h3 tt, h4 tt, h5 tt, h6 tt {
+    font-size: 100%;
+}
+
+tt {
+    background-color: #eeeeee;
+}
+
+ul.auto-toc {
+    list-style-type: none;
+}
+
+/* Don't want the HR */
+hr.footer {
+    display: none;
+}
+
+/* SAK */
+div.document {
+    background: white;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    padding: 0 1em 0 2em;
+    margin: 20px 3em 3em 140px;
+}
+
+/* SAK */
+div.footer {
+    background: #f0f0f0;    /* light gray */
+    font: 8pt sans-serif;
+    position: relative;
+    top: -50px;
+    margin: 0px 48px 0 140px;
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    padding: 1em 0 1em 2em;
+}
+
+/* XML pretty */
+div.xml {
+    font-family: sans-serif;
+    font-size: 9pt;
+}
+
+span.attrib {
+    color: #008080;
+}
+
+span.keyword {
+    color: #000080;
+}
+
+span.tags {
+    color: #000080;
+}
+
+span.warning {
+    color: maroon;
+}
+
+/* Before After Table */
+table.beforeafter {
+    border-collapse: collapse;
+}
+
+th.after, td.after {
+    border-left: solid thin gray;
+}
+
+/* DDLs table */
+table.ddls {
+    border: solid thin gray ;
+}
+
+table.ddls th {
+    background: #006633;
+    color: white;
+}
+
+table.ddls td {
+    font-size: 9pt;
+    font-family: monospace;
+}
+
+div.ddltitle {
+    border-top: solid thick black;
+    background: #006633;
+    color: white;
+    font-size: x-large;
+    padding: .2em 0em .2em .5em;
+    margin: 1em 0em .5em 0em;
+}

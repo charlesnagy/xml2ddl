@@ -1,0 +1,54 @@
+Version 0.3.1 (2005-09-27)
+---------------------------
+- Changed the way it's installed, now uses scripts and easy_install.
+
+- More documentation
+
+- Some bug fixes.
+
+- Some preliminary support for enfocing naming conventions.
+  See NamingConvention.py
+
+Version 0.3 (2004-10-18)
+------------------------
+
+- Added support for Views
+
+- Added support for stored functions.
+
+- Huge amount of refactoring of the code was done to split out the DBMS specific code into ddlInterface.py
+
+- Some ordering of the DDL statements is performed to decrease the chance of a statement failing because of a dependancy. 
+  But a real dependancy list is probably still required.
+
+- Support for *Oracle* 10g
+  
+Version 0.2 (2004-10-04)
+------------------------
+
+- Can now download the schema from PostgreSQL, MySQL and Firefox
+
+- Unit tests now download the schema from the database to verify the changes expected were made.
+
+- Autoincrement does the right thing for each DBMS.
+
+- Relation constraints like "ON DELETE CASCADE" supported.
+
+Version 0.1
+-----------
+
+- dbTests.py now uses the test XML files for testing as well.
+  It's a far better system and I may scrap the previous, more complex system.
+
+- Added nice HTML output of the above test files.
+
+- Better support for object names with spaces, special character or a keywords.
+
+- Autoincrement support (add, drop as well).  Does the right thing for the various
+  database managment systems.
+
+- Create and drop relations.
+
+- Fixes to the documentation.
+
+- Alpha code to download of the schema for PostgreSQL.

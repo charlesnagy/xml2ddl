@@ -1,0 +1,5 @@
+    <dictionary name="column">
+        <dict class="index" type="integer" null="no"/>
+        <dict class="key"   inherits="index" fullname="Primary Key" name="id" key="1"
+            desc="Primary key for the table"/>
+    </dictionary>

@@ -1,0 +1,11 @@
+include xml2ddl/*.py
+include CHANGELOG.txt
+include TODO.txt
+include doc/*.html
+include doc/*.pdf
+include doc/*.css
+include doc/*.gif
+include doc/*.png
+prune tests
+exclude .svn
+prune .svn
