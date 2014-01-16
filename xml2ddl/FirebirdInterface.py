@@ -8,7 +8,7 @@ class FbDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'firebird'
         
-    def connect(self, info):
+    def connect(self, dbname, user, passwd, host, **kwargs):
         try:
             import kinterbasdb
         except:
@@ -16,11 +16,11 @@ class FbDownloader(DownloadCommon):
             return
         
         self.strDbms = 'firebird'
-        self.version = info['version']
+        self.version = kwargs.get('version')
         self.conn = kinterbasdb.connect(
-            dsn='localhost:%s' % info['dbname'],
-            user = info['user'], 
-            password = info['pass'])
+            dsn='localhost:%s' % dbname,
+            user = user, 
+            password = passwd)
         self.cursor = self.conn.cursor()
         
     def useConnection(self, con, version):

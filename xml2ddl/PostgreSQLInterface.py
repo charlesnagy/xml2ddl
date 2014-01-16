@@ -10,14 +10,14 @@ class PgDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'postgres'
         
-    def connect(self, info):
+    def connect(self, dbname, user, passwd, host, **kwargs):
         try:
             import psycopg
         except:
             print "Missing PostgreSQL support through psycopg"
             return
         
-        self.conn = psycopg.connect('host=%(host)s dbname=%(dbname)s user=%(user)s password=%(pass)s' % info)
+        self.conn = psycopg.connect('host=%(host)s dbname=%(dbname)s user=%(user)s password=%(passwd)s' % dict(host=host, dbname=dbname, user=user, passwd=passwd))
         self.cursor = self.conn.cursor()
         #self.doSomeTests()
         

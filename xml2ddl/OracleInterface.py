@@ -9,15 +9,15 @@ class OracleDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'oracle'
         
-    def connect(self, info):
+    def connect(self, dbname, user, passwd, host, **kwargs):
         try:
             import cx_Oracle
         except:
             print "Missing Oracle support through cx_Oracle, see http://www.computronix.com/utilities.shtml#Oracle"
             return
         
-        self.version = info['version']
-        self.conn = cx_Oracle.connect(info['user'], info['pass'], info['dbname'])
+        self.version = kwargs.get('version')
+        self.conn = cx_Oracle.connect(user, passwd, dbname)
         self.cursor = self.conn.cursor()
         
     def _tableInfo(self, strTable):

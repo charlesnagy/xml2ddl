@@ -231,9 +231,9 @@ def createDownloader(dbms, conn = None, info = None, options = None):
         db = OracleDownloader()
 
     if conn:
-        db.useConnection(conn, info['version'])
+        db.useConnection(conn, info.get('version'))
     elif info:
-        db.connect(info)
+        db.connect(**info)
     else:
         info = conn_info[dbms]
         db.connect(info)
@@ -250,6 +250,9 @@ def parseCommandLine():
     parser.add_option("", "--host",
         dest="strHost", metavar="HOST", default="localhost",
         help="Hostname or IP of machine")
+    parser.add_option("-S", "--socket",
+        dest="strSocket", metavar="SOCKET", default=None,
+        help="Socket for mysql connection")
     parser.add_option("-d", "--dbname",
         dest="strDbName", metavar="DATABASE", 
         help="Dowload for which named Database")
@@ -277,9 +280,9 @@ def parseCommandLine():
     info = {
         'dbname' : options.strDbName, 
         'user'   : options.strUserName, 
-        'pass'   : options.strPassword,
+        'passwd'   : options.strPassword,
         'host'   : options.strHost,
-        'version' : 99,
+        'unix_socket': options.strSocket,
     }
 
     if options.strTables:

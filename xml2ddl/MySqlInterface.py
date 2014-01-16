@@ -7,18 +7,29 @@ import re
 class MySqlDownloader(DownloadCommon):
     def __init__(self):
         self.strDbms = 'mysql'
-        self.version = (5, 0)
+        self.conn = None
     
-    def connect(self, info):
+    def connect(self, dbname, user, passwd, host, **kwargs):
         try:
             import MySQLdb
         except:
             print "Missing MySQL support through MySQLdb"
             return
-            
-        self.version = info['version']
-        self.conn = MySQLdb.connect(db=info['dbname'], user=info['user'], passwd=info['pass'])
+        
+        self.conn = MySQLdb.connect(db=dbname, user=user, passwd=passwd, host=host, **kwargs)
         self.cursor = self.conn.cursor()
+
+    @property
+    def version(self):
+        if not self.conn:
+            return False
+        if not hasattr(self, '_version'):
+            self.cursor.execute('select @@version')
+            _version = re.match('^([345])\.([0-9]+).*', self.cursor.fetchone()[0])
+            if _version:
+                self._version = _version.group(1), _version.group(2)
+            
+        return self._version 
 
     def useConnection(self, conn, version):
         self.conn = conn
@@ -117,7 +128,7 @@ class MySqlDownloader(DownloadCommon):
         ret = []
         keyMap = {}
         for index in indexes:
-            (Table, Non_unique, Key_name, Seq_in_index, Column_name, Collation, Cardinality, Sub_part, Packed, Null, Index_type, Comment) = index
+            (Table, Non_unique, Key_name, Seq_in_index, Column_name, Collation, Cardinality, Sub_part, Packed, Null, Index_type, Comment) = index[:12]
             if Key_name == 'PRIMARY':
                 bIsPrimary = True
             else:
