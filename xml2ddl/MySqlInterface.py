@@ -99,6 +99,26 @@ class MySqlDownloader(DownloadCommon):
         
         return None
 
+    def getTableOptions(self, strTableName):
+        """ Returns a dictionary of table options """
+        _map = [
+            ('Engine', 1),
+        ]
+        _opts = dict()
+        strQuery = "SHOW TABLE STATUS LIKE '%s'" % strTableName
+        self.cursor.execute(strQuery)
+        fullstat = self.cursor.fetchone()
+        for attr, field in _map:
+            _opts.update({attr: fullstat[field]})
+        # Create options        
+        if fullstat[16]:
+            for _cr_opts in fullstat[16].split(' '):
+                _m = re.match('^([a-zA-Z_0-9]+)=([^ ]+)$', _cr_opts.strip())
+                if _m:
+                    _opts.update({_m.group(1): _m.group(2)})
+
+        return _opts
+
     def getColumnComment(self, strTableName, strColumnName):
         """ Returns the comment as a string """
         strQuery = "SHOW FULL COLUMNS FROM `%s`" % (strTableName)

@@ -391,7 +391,7 @@ class DdlCommonInterface:
             strDefault = ' DEFAULT ' + col.get('default')
         elif self.dbmsType == 'mysql' and col.get('type') == 'timestamp':
             # MySQL silently sets the default to CURRENT_TIMESTAMP
-            strRet += ' DEFAULT null'
+            strDefault += ' DEFAULT null'
 
         strType = col.get('type', None)
         strSize = col.get('size', None)

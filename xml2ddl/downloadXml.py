@@ -66,6 +66,10 @@ class DownloadXml:
             if desc:
                 curTable['desc'] = escape(desc)
             
+            opts = self.db.getTableOptions(strTableName)
+            if opts:
+                curTable['options'] = opts
+
             if self.options == None or 'getindexes' not in self.options or self.options['getindexes'] == True:
                 curTable['indexes'] = self.db.getTableIndexes(strTableName)
             
@@ -156,6 +160,13 @@ class DownloadXml:
 
     def dumpTable(self, info, of):
         of.write('  <table %s>\n' % (self.doAttribs(info, ['name', 'desc'])))
+
+        if info.get('options', False):
+            of.write('    <options>\n')
+            for option, value in info['options'].items():
+                if value:
+                    of.write('      <option name="%s">%s</option>\n' % (option, value))
+            of.write('    </options>\n')
         
         # Would be nice to align the columns
         for col in info['columns']:

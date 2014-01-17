@@ -26,6 +26,10 @@ class DownloadCommon:
     def getTableComment(self, strTableName):
         """ Returns the comment as a string """
         return None
+ 
+    def getTableOptions(self, strTableName):
+        """ Returns the options for the table in a dictionary """
+        return None
 
     def getColumnComment(self, strTableName, strColumnName):
         """ Returns the comment as a string """

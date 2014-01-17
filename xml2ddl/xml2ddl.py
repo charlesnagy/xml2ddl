@@ -174,8 +174,10 @@ class Xml2Ddl:
         keys = self.retKeys(doc)
         strTableStuff = ''
         
-        if self.dbmsType.startswith('mysql'):
-            strTableStuff += ' TYPE=InnoDB'
+        opts = doc.getElementsByTagName('options')
+        if opts:
+            for opt in opts[0].getElementsByTagName('option'):
+                strTableStuff += " %s=%s" % (opt.getAttribute('name'), opt.firstChild.nodeValue)
         if doc.hasAttribute('desc') and self.dbmsType.startswith('mysql'):
             strTableStuff += " COMMENT=%s" % (self.ddlInterface.quoteString(doc.getAttribute('desc')))
         
