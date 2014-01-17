@@ -83,11 +83,11 @@ class DownloadXml:
                 curTable['relations'] = self.db.getTableRelations(strTableName)
             
             for colRow in self.db.getTableColumns(strTableName):
-                (strColumnName, type, attlen, precision, attnotnull, default, bAutoIncrement) = colRow
+                (strColumnName, colType, attlen, precision, attnotnull, default, bAutoIncrement) = colRow
                 curCol = {
                     'name' : str(strColumnName),
-                    'type' : str(type),
-                }   
+                    'type' : str(colType),
+                }
                 if attlen:
                     curCol['size'] = attlen
                 

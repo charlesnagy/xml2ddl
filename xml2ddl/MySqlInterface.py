@@ -54,7 +54,7 @@ class MySqlDownloader(DownloadCommon):
             (strColumnName, strColType, nColSize, nColPrecision, bNotNull, strDefault, auto_increment)
         """
         re_size_prec = re.compile(r'(\w+)\((\d+),\s*(\d+)\)')
-        re_size = re.compile(r'(\w+)\((\d+)\)')
+        re_size = re.compile(r'(\w+)\((\d+)\) (unsigned|signed)?')
         
         strQuery = "SHOW COLUMNS FROM `%s`" % (strTable)
         self.cursor.execute(strQuery)
@@ -79,7 +79,7 @@ class MySqlDownloader(DownloadCommon):
             else:
                 match = re_size.match(type)
                 if match:
-                    newType = match.group(1)
+                    newType = match.group(1) if not match.group(3) else '%s %s'%(match.group(1), match.group(3))
                     nColSize = int(match.group(2))
                     nColPrecision = None
                 else:
@@ -325,6 +325,11 @@ class DdlMySql(DdlCommonInterface):
             TINYINT TINYTEXT TO TRAILING TRUE UNDO UNION UNIQUE UNLOCK UNSIGNED UPDATE USAGE USE USER_RESOURCES USING
             UTC_DATE UTC_TIME UTC_TIMESTAMP VALUES VARBINARY VARCHAR VARCHARACTER VARYING WHEN WHERE WHILE WITH
             WRITE XOR YEAR_MONTH ZEROFILL""".split() 
+
+    def quoteName(self, strName):
+        if strName[0] == self.params['quote_l'] and strName[-1] == self.params['quote_r']:
+            return strName
+        return self.params['quote_l'] + strName + self.params['quote_r']
             
     def dropKeyConstraint(self, strTable, strConstraintName, diffs):
         """ Can't drop constraints """

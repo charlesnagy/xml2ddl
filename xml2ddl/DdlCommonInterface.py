@@ -398,9 +398,13 @@ class DdlCommonInterface:
         strPrec = col.get('precision', None)
         
         if strPrec:
-            strRet = '%s(%s, %s)%s%s' % (strType, strSize, strPrec, strDefault, strNull)
+            strRet = '%s(%s, %s)%s%s' % (strType, strSize, strPrec, strNull, strDefault)
         elif strSize:
-            strRet = '%s(%s)%s%s' % (strType, strSize, strDefault, strNull)
+            if ' ' in strType:
+                _type = strType.split(' ')
+                strRet = '%s(%s) %s %s%s' % (_type[0], strSize, ' '.join(_type[1:]), strNull, strDefault)
+            else:
+                strRet = '%s(%s)%s%s' % (strType, strSize, strNull, strDefault)
         else:
             strRet = '%s%s%s' % (strType, strDefault, strNull)
 
