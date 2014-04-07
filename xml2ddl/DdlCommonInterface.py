@@ -13,7 +13,7 @@ class DdlCommonInterface:
         self.dbmsType = strDbms
         self.params = {
             # Table
-            'add_table'       : ['CREATE TABLE %(table_name)s (\n\t%(col_defs)s%(primary_keys)s)%(extra)s'],
+            'add_table'       : ['CREATE TABLE %(table_name)s (\n  %(col_defs)s%(primary_keys)s)%(extra)s'],
             'drop_table'      : ['DROP TABLE %(table_name)s%(cascade)s'],
             'rename_table'    : ['ALTER TABLE %(table_name)s RENAME TO %(new_table_name)s'],
             'table_desc'      : ["COMMENT ON TABLE %(table)s IS %(desc)s"],
@@ -57,12 +57,12 @@ class DdlCommonInterface:
     def addTable(self, strTableName, colDefs, keys, strTableStuff, diffs):
         info = {
             'table_name' : self.quoteName(strTableName),
-            'col_defs'   : ',\n\t'.join(colDefs),
+            'col_defs'   : ',\n  '.join(colDefs),
             'primary_keys' : '\n',
             'extra'      : strTableStuff,
         }
         if len(keys) > 0:
-            info['primary_keys'] = ',\n\tCONSTRAINT pk_%s PRIMARY KEY (%s)' % (info['table_name'], ',\n\t'.join(keys))
+            info['primary_keys'] = ',\n  CONSTRAINT pk_%s PRIMARY KEY (%s)' % (info['table_name'], ',\n  '.join(keys))
 
         for strDdl in self.params['add_table']:
             diffs.append(('Create Table', strDdl % info))

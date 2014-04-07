@@ -103,6 +103,7 @@ class MySqlDownloader(DownloadCommon):
         """ Returns a dictionary of table options """
         _map = [
             ('Engine', 1),
+            ('Auto_increment', 10),
         ]
         _opts = dict()
         strQuery = "SHOW TABLE STATUS LIKE '%s'" % strTableName
@@ -110,14 +111,29 @@ class MySqlDownloader(DownloadCommon):
         fullstat = self.cursor.fetchone()
         for attr, field in _map:
             _opts.update({attr: fullstat[field]})
-        # Create options        
+        _opts.update({'Default charset': self.getCharsetFromCollation(fullstat[14])})
+        # Create options
         if fullstat[16]:
             for _cr_opts in fullstat[16].split(' '):
                 _m = re.match('^([a-zA-Z_0-9]+)=([^ ]+)$', _cr_opts.strip())
                 if _m:
                     _opts.update({_m.group(1): _m.group(2)})
 
-        return _opts
+        return dict([(k.upper(), v) for k, v in _opts.iteritems()])
+
+    def getCharsetFromCollation(self, collation):
+        self.cursor.execute("SHOW COLLATION LIKE %s", (collation, ))
+        try:
+            return self.cursor.fetchone()[1]
+        except IndexError:
+            # Failed to fetch it from the database
+            # Trying fallback method
+            _match = re.match('^(?P<charset>[a-zA-Z0-9]+)(_.*)?$', collation)
+            if _match:
+                return _match.group('charset')
+            else:
+                # This is probably should be tuned to return the default charset of the database or something
+                return 'utf8'
 
     def getColumnComment(self, strTableName, strColumnName):
         """ Returns the comment as a string """
@@ -302,6 +318,7 @@ class DdlMySql(DdlCommonInterface):
         self.params['column_desc'] = ["ALTER TABLE %(table)s MODIFY %(column)s %(type)sCOMMENT %(desc)s"]
         self.params['has_auto_increment'] = True
         self.params['can_change_table_comment'] = False
+        self.params['add_key_constraint'] = ['ALTER TABLE %(table_name)s ADD PRIMARY KEY (%(keys)s)']
         self.params['drop_index'] = ['DROP INDEX %(index_name)s ON %(table_name)s']
         self.params['drop_default'] = ['ALTER TABLE %(table_name)s MODIFY %(column_name)s %(column_type)s']
         self.params['rename_column'] = ['ALTER TABLE %(table_name)s CHANGE %(old_col_name)s %(new_col_name)s %(column_type)s']
@@ -326,6 +343,21 @@ class DdlMySql(DdlCommonInterface):
             UTC_DATE UTC_TIME UTC_TIMESTAMP VALUES VARBINARY VARCHAR VARCHARACTER VARYING WHEN WHERE WHILE WITH
             WRITE XOR YEAR_MONTH ZEROFILL""".split() 
 
+    # Tables
+    def addTable(self, strTableName, colDefs, keys, strTableStuff, diffs):
+        info = {
+            'table_name' : self.quoteName(strTableName),
+            'col_defs'   : ',\n  '.join(colDefs),
+            'primary_keys' : '\n',
+            'extra'      : strTableStuff,
+        }
+        if len(keys) > 0:
+            info['primary_keys'] = ',\n  PRIMARY KEY (%s)' % ','.join(keys)
+
+        for strDdl in self.params['add_table']:
+            diffs.append(('Create Table', strDdl % info))
+
+
     def quoteName(self, strName):
         if strName[0] == self.params['quote_l'] and strName[-1] == self.params['quote_r']:
             return strName
@@ -338,7 +370,8 @@ class DdlMySql(DdlCommonInterface):
     def dropRelation(self, strTableName, strRelationName, diffs):
         """ Can't drop relations """
         pass
-        
+
+
     def addFunction(self, strNewFunctionName, argumentList, strReturn, strContents, attribs, diffs):
         argumentList = [ '%s' % arg for arg in argumentList ]
         info = {
