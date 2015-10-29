@@ -12,12 +12,16 @@ class MySqlDownloader(DownloadCommon):
     def connect(self, dbname, user, passwd, host, **kwargs):
         try:
             import MySQLdb
+            # Get rid of the MySQLdb warnings
+            import warnings
+            warnings.simplefilter("ignore", MySQLdb.Warning)
+
         except:
             print "Missing MySQL support through MySQLdb"
             return
-        
         self.conn = MySQLdb.connect(db=dbname, user=user, passwd=passwd, host=host, **kwargs)
         self.cursor = self.conn.cursor()
+
 
     @property
     def version(self):
@@ -39,7 +43,7 @@ class MySqlDownloader(DownloadCommon):
     def getTables(self, tableList):
         """ Returns the list of tables as a array of strings """
         
-        strQuery = "SHOW TABLES"
+        strQuery = "SHOW FULL TABLES"
         self.cursor.execute(strQuery)
         rows = self.cursor.fetchall()
         ret = []
@@ -111,7 +115,8 @@ class MySqlDownloader(DownloadCommon):
         fullstat = self.cursor.fetchone()
         for attr, field in _map:
             _opts.update({attr: fullstat[field]})
-        _opts.update({'Default charset': self.getCharsetFromCollation(fullstat[14])})
+        if fullstat[14]:
+            _opts.update({'Default charset': self.getCharsetFromCollation(fullstat[14])})
         # Create options
         if fullstat[16]:
             for _cr_opts in fullstat[16].split(' '):
@@ -161,6 +166,7 @@ class MySqlDownloader(DownloadCommon):
         strQuery = 'show index from `%s`' % (strTableName)
         self.cursor.execute(strQuery)
         indexes = self.cursor.fetchall()
+
         ret = []
         keyMap = {}
         for index in indexes:
@@ -253,7 +259,8 @@ class MySqlDownloader(DownloadCommon):
         if rows:
             ret = rows[0][1]
             # ext CREATE VIEW test.v AS select 1 AS `a`,2 AS `b`
-            reGetDef = re.compile('CREATE (?:ALGORITHM=[^ ]+[ ])?VIEW [a-zA-Z0-9_$`\.]+ AS (.*)')
+            # CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY INVOKER VIEW `SiteExperimentFullOnSummary` AS select
+            reGetDef = re.compile('CREATE (?:ALGORITHM=[^ ]+ )?(?:DEFINER=`[^`]+`@`[^`]+` )?(?:SQL SECURITY INVOKER )?VIEW [a-zA-Z0-9_$`\.]+ AS (.*)')
             match = reGetDef.match(ret)
             if match:
                 return match.group(1)
@@ -268,6 +275,7 @@ class MySqlDownloader(DownloadCommon):
         """ Returns functions """
         
         # TODO handle the functionList
+        return []
         strQuery = "SHOW FUNCTION STATUS"
         try:
             self.cursor.execute(strQuery)
